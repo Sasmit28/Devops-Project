@@ -2,7 +2,8 @@ pipeline {
     agent any
     
     environment {
-    DOCKER_CREDS = credentials('5bcf4aea-f2d6-4730-98fb-ca1755b8c3ef')
+    DOCKERHUB_USERNAME = credentials('ishwari20')   // 🔴 This ID must match the real one
+    DOCKERHUB_PASSWORD = credentials('Ishwari@20')
 }
 
     
@@ -42,10 +43,9 @@ pipeline {
         stage('Docker Build & Push') {
             steps {
                 bat """
-                    echo %DOCKER_CREDS_PSW% | docker login -u %DOCKER_CREDS_USR% --password-stdin
-                    docker build -t %DOCKER_CREDS_USR%/todo-flask-app:latest .
-                    docker push %DOCKER_CREDS_USR%/todo-flask-app:latest
-
+                    echo %DOCKERHUB_PASSWORD% | docker login -u %DOCKERHUB_USERNAME% --password-stdin
+                    docker build -t %DOCKERHUB_USERNAME%/todo-flask-app:latest .
+                    docker push %DOCKERHUB_USERNAME%/todo-flask-app:latest
                 """
             }
         }
