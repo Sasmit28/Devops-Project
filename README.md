@@ -27,3 +27,5 @@ Our pipeline implements:
 - Member 1: Git Operations
 - Member 2: Jenkins Configuration
 - Member 3: Docker Deployment
+
+Made a change for test
