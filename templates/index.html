@@ -1,0 +1,165 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>To-Do List App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .todo-form {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+        .todo-form input, .todo-form textarea {
+            margin-bottom: 10px;
+            padding: 8px;
+        }
+        .todo-form button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .todo-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .todo-item.completed {
+            background-color: #f8f8f8;
+            text-decoration: line-through;
+        }
+        .todo-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .todo-actions button {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .complete-btn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+        }
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>To-Do List Application</h1>
+    
+    <div class="todo-form">
+        <h2>Add New Task</h2>
+        <input type="text" id="title" placeholder="Task title" required>
+        <textarea id="description" placeholder="Task description"></textarea>
+        <button onclick="addTodo()">Add Task</button>
+    </div>
+    
+    <h2>Your Tasks</h2>
+    <div id="todos-container"></div>
+    
+    <script>
+        // Fetch all todos when page loads
+        document.addEventListener('DOMContentLoaded', fetchTodos);
+        
+        function fetchTodos() {
+            fetch('/api/todos')
+                .then(response => response.json())
+                .then(todos => {
+                    const container = document.getElementById('todos-container');
+                    container.innerHTML = '';
+                    
+                    todos.forEach(todo => {
+                        container.appendChild(createTodoElement(todo));
+                    });
+                })
+                .catch(error => console.error('Error fetching todos:', error));
+        }
+        
+        function createTodoElement(todo) {
+            const todoDiv = document.createElement('div');
+            todoDiv.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+            todoDiv.innerHTML = `
+                <h3>${todo.title}</h3>
+                <p>${todo.description || 'No description'}</p>
+                <small>Created: ${new Date(todo.created_at).toLocaleString()}</small>
+                <div class="todo-actions">
+                    <button class="complete-btn" onclick="toggleComplete(${todo.id}, ${!todo.completed})">
+                        ${todo.completed ? 'Mark Incomplete' : 'Mark Complete'}
+                    </button>
+                    <button class="delete-btn" onclick="deleteTodo(${todo.id})">Delete</button>
+                </div>
+            `;
+            return todoDiv;
+        }
+        
+        function addTodo() {
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            
+            if (!title) {
+                alert('Title is required');
+                return;
+            }
+            
+            fetch('/api/todos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ title, description }),
+            })
+            .then(response => response.json())
+            .then(() => {
+                // Clear form fields
+                document.getElementById('title').value = '';
+                document.getElementById('description').value = '';
+                
+                // Refresh todos list
+                fetchTodos();
+            })
+            .catch(error => console.error('Error adding todo:', error));
+        }
+        
+        function toggleComplete(id, completed) {
+            fetch(`/api/todos/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ completed }),
+            })
+            .then(() => fetchTodos())
+            .catch(error => console.error('Error updating todo:', error));
+        }
+        
+        function deleteTodo(id) {
+            if (confirm('Are you sure you want to delete this task?')) {
+                fetch(`/api/todos/${id}`, {
+                    method: 'DELETE',
+                })
+                .then(() => fetchTodos())
+                .catch(error => console.error('Error deleting todo:', error));
+            }
+        }
+    </script>
+</body>
+</html>
