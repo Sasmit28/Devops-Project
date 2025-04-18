@@ -17,6 +17,7 @@ pipeline {
             steps {
                 bat 'python -m venv venv'
                 bat 'venv\\Scripts\\activate && pip install -r requirements.txt'
+                bat 'venv\\Scripts\\activate && pip install flake8 pytest' // Explicitly install flake8 and pytest
             }
         }
 
@@ -25,7 +26,6 @@ pipeline {
                 bat 'call venv\\Scripts\\activate && python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics'
             }
         }
-
 
         stage('Build') {
             steps {
@@ -38,7 +38,6 @@ pipeline {
                 bat 'call venv\\Scripts\\activate && python -m pytest tests/'
             }
         }
-
 
         stage('Docker Build & Push') {
             steps {
