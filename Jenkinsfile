@@ -22,8 +22,8 @@ pipeline {
 
         stage('Linting') {
              steps {
-                    bat '. venv/Scripts/activate && python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics'
-            }   
+                bat 'call venv\\Scripts\\activate && python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics'
+            }
         }
 
 
@@ -33,12 +33,12 @@ pipeline {
             }
         }
 
-        stage('Test Execution') {
+       stage('Test Execution') {
             steps {
-                bat 'venv\\Scripts\\pytest tests/'
-
+                bat 'call venv\\Scripts\\activate && python -m pytest tests/'
             }
         }
+
 
         stage('Docker Build & Push') {
             steps {
