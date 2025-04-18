@@ -1,78 +1,59 @@
 pipeline {
     agent any
-    
-    environment {
-    DOCKERHUB_USERNAME = credentials('ishwari20')   // 🔴 This ID must match the real one
-    DOCKERHUB_PASSWORD = credentials('Ishwari@20')
-}
 
-    
+    environment {
+        DOCKER_HUB_CREDENTIALS = credentials('5bcf4aea-f2d6-4730-98fb-ca1755b8c3ef') // Jenkins credentials ID
+        DOCKER_IMAGE = "ishwari20/devopstodo" // <-- replace with your actual Docker Hub repo name
+    }
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        
-        stage('Docker Version') {
+
+        stage('Dependency Installation') {
             steps {
-                bat 'docker --version'
+                sh 'python -m venv venv'
+                sh '. venv/bin/activate && pip install -r requirements.txt'
             }
         }
 
-        stage('Install') {
+        stage('Linting') {
             steps {
-                bat 'pip install -r requirements.txt'
+                sh '. venv/bin/activate && flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics'
             }
         }
-        
-        stage('Lint') {
-            steps {
-                bat 'pip install flake8'
-                bat 'flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics || echo "Linting complete with warnings"'
-            }
-        }
-        
-        stage('Test') {
-            steps {
-                bat 'pip install pytest'
-                bat 'pytest || echo "Tests complete with warnings"'
-            }
-        }
-        
+
         stage('Build') {
             steps {
-                echo 'Building Flask application...'
+                echo 'Nothing to build for Python, skipping...' // optional
             }
         }
-        
+
+        stage('Test Execution') {
+            steps {
+                sh '. venv/bin/activate && pytest tests/'
+            }
+        }
+
         stage('Docker Build & Push') {
             steps {
-                bat """
-                    echo %DOCKERHUB_PASSWORD% | docker login -u %DOCKERHUB_USERNAME% --password-stdin
-                    docker build -t %DOCKERHUB_USERNAME%/todo-flask-app:latest .
-                    docker push %DOCKERHUB_USERNAME%/todo-flask-app:latest
-                """
-            }
-        }
-        
-        stage('Deploy') {
-            steps {
-                bat 'docker-compose down || echo "No containers to stop"'
-                bat 'docker-compose up -d'
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-creds') {
+                        def image = docker.build("${DOCKER_IMAGE}:${BUILD_NUMBER}")
+                        image.push()
+                        image.push('latest')
+                    }
+                }
             }
         }
     }
-    
+
     post {
         always {
-            echo 'Pipeline execution completed'
-        }
-        success {
-            echo 'Pipeline executed successfully!'
-        }
-        failure {
-            echo 'Pipeline execution failed!'
+            cleanWs()
         }
     }
 }
