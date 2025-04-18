@@ -23,7 +23,7 @@ pipeline {
 
         stage('Linting') {
              steps {
-                bat 'call venv\\Scripts\\activate && python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics'
+                bat 'call venv\\Scripts\\activate && python -m flake8 --exclude=venv --count --select=E9,F63,F7,F82 --show-source --statistics .'
             }
         }
 
