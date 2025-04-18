@@ -22,7 +22,8 @@ pipeline {
 
         stage('Linting') {
             steps {
-                bat 'venv\\Scripts\\activate && flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics'
+                bat 'venv\\Scripts\\flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics'
+
             }
         }
 
@@ -34,7 +35,8 @@ pipeline {
 
         stage('Test Execution') {
             steps {
-                bat 'venv\\Scripts\\activate && pytest tests/'
+                bat 'venv\\Scripts\\pytest tests/'
+
             }
         }
 
