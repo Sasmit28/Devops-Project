@@ -21,11 +21,11 @@ pipeline {
         }
 
         stage('Linting') {
-            steps {
-                bat 'venv\\Scripts\\flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics'
-
-            }
+             steps {
+                    bat '. venv/Scripts/activate && python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics'
+            }   
         }
+
 
         stage('Build') {
             steps {
