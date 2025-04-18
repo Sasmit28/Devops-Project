@@ -14,6 +14,12 @@ pipeline {
             }
         }
         
+        stage('Docker Version') {
+            steps {
+                bat 'docker --version'
+            }
+        }
+
         stage('Install') {
             steps {
                 bat 'pip install -r requirements.txt'
