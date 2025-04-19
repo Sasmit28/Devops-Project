@@ -27,8 +27,7 @@ pipeline {
 
         stage('Test Execution') {
             steps {
-                bat 'docker run --rm -v "${PWD}:/app" -w /app -e PYTHONPATH=/app ishwari20/devopstodo:latest pytest tests/'
-'
+                bat 'docker run --rm -v "%cd%:/app" -w /app -e PYTHONPATH=/app ishwari20/devopstodo:latest pytest tests/'
             }
         }
 
