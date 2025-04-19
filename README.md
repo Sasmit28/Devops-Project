@@ -1,4 +1,4 @@
-# Cloud-Based Todo App
+# Todo App
 
 A Flask-based Todo application with CI/CT/CD pipeline using Git, Jenkins, and Docker.
 
