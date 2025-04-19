@@ -17,15 +17,15 @@ pipeline {
             steps {
                 bat 'python -m venv venv'
                 bat 'venv\\Scripts\\activate && pip install -r requirements.txt'
+                bat 'venv\\Scripts\\activate && pip install flake8 pytest' // Explicitly install flake8 and pytest
             }
         }
 
         stage('Linting') {
              steps {
-                    bat '. venv/Scripts/activate && python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics'
-            }   
+                bat 'call venv\\Scripts\\activate && python -m flake8 --exclude=venv --count --select=E9,F63,F7,F82 --show-source --statistics .'
+            }
         }
-
 
         stage('Build') {
             steps {
@@ -33,24 +33,23 @@ pipeline {
             }
         }
 
-        stage('Test Execution') {
+       stage('Test Execution') {
             steps {
-                bat 'venv\\Scripts\\pytest tests/'
-
+                bat 'call venv\\Scripts\\activate && python -m pytest tests/'
             }
         }
 
-        stage('Docker Build & Push') {
+       stage('Docker Build & Push') {
             steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', '5bcf4aea-f2d6-4730-98fb-ca1755b8c3ef') {
-                        def image = docker.build("${DOCKER_IMAGE}:${BUILD_NUMBER}")
-                        image.push()
-                        image.push("latest")
-                    }
-                }
+                withCredentials([usernamePassword(credentialsId: '5bcf4aea-f2d6-4730-98fb-ca1755b8c3ef', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        bat "docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%"
+                        bat "docker build -t ishwari20/devopstodo:${BUILD_NUMBER} ."
+                        bat "docker tag ishwari20/devopstodo:${BUILD_NUMBER} ishwari20/devopstodo:latest"
+                        bat "docker push ishwari20/devopstodo:${BUILD_NUMBER}"
+                        bat "docker push ishwari20/devopstodo:latest"
+                  }
             }
-        }
+        }        
     }
 
     post {
