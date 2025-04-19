@@ -15,7 +15,7 @@ pipeline {
 
         stage('Linting') {
             steps {
-                bat 'docker run --rm -v %cd%:/app -w /app ishwari20/devopstodo:latest flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics'
+                bat 'docker run --rm -v %cd%:/app -w /app ishwari20/devopstodo:latest flake8 app/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics'
             }
         }
 
